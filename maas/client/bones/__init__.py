@@ -11,6 +11,7 @@ from collections import Iterable, namedtuple
 import json
 from urllib.parse import urlparse
 
+import os
 import aiohttp
 
 from . import helpers
@@ -454,7 +455,8 @@ class CallAPI:
         """
         insecure = self.action.handler.session.insecure
         connector = aiohttp.TCPConnector(verify_ssl=(not insecure))
-        session = aiohttp.ClientSession(connector=connector)
+        timeout = aiohttp.ClientTimeout(total=float(os.environ.get('MAAS_TIMEOUT', '300')))
+        session = aiohttp.ClientSession(connector=connector, timeout=timeout)
         async with session:
             response = await session.request(
                 self.action.method, uri, data=body, headers=_prefer_json(headers)
